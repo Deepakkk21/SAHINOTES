@@ -1,5 +1,9 @@
 const User = require('../modals/user');
 
+const Fast2SMS_key = "bh45nmQSfGAWiX8Nv6ZJHRkpFD0tE37qTPsVCzMlgY2BIdyex9mSQfCvGbs6U9pEXKiY4Rq0BjzWd2oZ";
+var unirest = require("unirest");
+
+
 module.exports.signupPage = function(req,res){
        return res.render("signup")
 }
@@ -76,7 +80,9 @@ module.exports.signIn = async function(req,res){
         console.log(user);
         if(user.password===password){
             console.log("welcome to profile page");
-            return res.redirect('/user/profile');
+            return res.redirect('/user/profile',{
+                user_id : user.id
+            });
 
         }else{
             // alert the user about wrong password
@@ -88,5 +94,39 @@ module.exports.signIn = async function(req,res){
        console.log("email doesnot exits");
         return res.redirect("/auth/signup")
     }
+
+}
+
+// mobile verification
+
+module.exports.verify_mobile= function(req, res){
+    return res.render('VerifyMobile')
+}
+
+module.exports.sendOtp = function(req,res){
+var mobile =req.body.mobile;
+ console.log(mobile);
+ console.log(req.body);
+
+var req = unirest("GET", "https://www.fast2sms.com/dev/bulkV2");
+var OTP = Math.floor(1000 + Math.random() * 9000);
+console.log(OTP);
+req.query({
+  "authorization": Fast2SMS_key,
+  "variables_values": OTP,
+  "route": "otp",
+  "numbers": mobile
+});
+
+req.headers({
+  "cache-control": "no-cache"
+});
+
+
+req.end(function (res) {
+  if (res.error) throw new Error(res.error);
+
+  console.log(res.body);
+});
 
 }
