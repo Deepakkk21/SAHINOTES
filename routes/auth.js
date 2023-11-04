@@ -11,4 +11,5 @@ router.post('/signIn',authController.signIn); // this is the route
 router.get('/verifymobile',authController.verify_mobile);
 router.post('/mobile/sendotp',authController.sendOtp);
 
+router.post("/mobile/verifyotp",authController.verifyOtp)
 module.exports = router;

@@ -9,6 +9,8 @@ const userSchema = new Schema({
   mobile : {type :String},
   email_otp : {type : String},
   mobile_otp : {type: String},
+  mobile_verified : {type: Boolean , default : false}
+
 },{
     timestamps: true
 });

@@ -80,13 +80,11 @@ module.exports.signIn = async function(req,res){
         console.log(user);
         if(user.password===password){
             console.log("welcome to profile page");
-            return res.redirect('/user/profile',{
-                user_id : user.id
-            });
+            return res.redirect("/user/profile/"+user.id);
 
         }else{
             // alert the user about wrong password
-            console.log("email doesnot exits");
+            console.log("Wrong passord");
         return res.redirect("back")
         }
     }else{
@@ -103,10 +101,12 @@ module.exports.verify_mobile= function(req, res){
     return res.render('VerifyMobile')
 }
 
-module.exports.sendOtp = function(req,res){
-var mobile =req.body.mobile;
+module.exports.sendOtp =  async function(req,res){
+var mobile =req.body.mobileNumber;
+var id =req.body.user_id;
+var user = await User.findById(id);
+user.mobile_verified =false;
  console.log(mobile);
- console.log(req.body);
 
 var req = unirest("GET", "https://www.fast2sms.com/dev/bulkV2");
 var OTP = Math.floor(1000 + Math.random() * 9000);
@@ -123,10 +123,37 @@ req.headers({
 });
 
 
-req.end(function (res) {
+req.end( async function (res) {
   if (res.error) throw new Error(res.error);
 
   console.log(res.body);
+  user.mobile_otp=OTP;
+  user.mobile=mobile;
+  await user.save();
+  setTimeout(async(id) => {
+    var updated_user = await User.findOne({mobile : user.mobile});
+    updated_user.mobile_otp=undefined;
+    if(updated_user.mobile_verified==false){
+        updated_user.mobile=undefined;
+    }
+    await updated_user.save();
+  }, 30*1000);
+  
 });
 
+}
+
+module.exports.verifyOtp =async function(req,res){
+    var OTP = req.body.otp;
+    var id = req.body.user_id;
+    var user = await User.findById(id);
+    if(user.mobile_otp&& OTP==user.mobile_otp){
+        user.mobile_verified = true;
+        await user.save();
+        console.log("mobile is verified");
+
+    }else{
+        user.mobile=undefined;
+        await user.save();
+    }
 }

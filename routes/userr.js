@@ -3,6 +3,7 @@ const express=require('express');
 
 const router = express.Router();
 
-router.get('/profile',userController.user_controller);
+
+router.get('/profile/:id',userController.user_controller)
 
 module.exports=router;
